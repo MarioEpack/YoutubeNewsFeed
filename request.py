@@ -83,11 +83,11 @@ def remove_empty_kwargs(**kwargs):
     return good_kwargs
 
 
-def subscriptions_list_my_subscriptions(client, **kwargs):
+def channels_list_by_username(client, **kwargs):
     # See full sample for function
     kwargs = remove_empty_kwargs(**kwargs)
 
-    response = client.subscriptions().list(
+    response = client.channels().list(
         **kwargs
     ).execute()
 
@@ -100,6 +100,6 @@ if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     client = get_authenticated_service()
 
-    subscriptions_list_my_subscriptions(client,
-                                        part='snippet,contentDetails',
-                                        mine=True)
+    channels_list_by_username(client,
+                              part='contentDetails',
+                              forUsername='Raon Lee')
