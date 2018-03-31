@@ -553,9 +553,26 @@ my_json = {u'nextPageToken': u'CBkQAA', u'items': [{u'snippet': {u'playlistId': 
            u'pageInfo': {u'resultsPerPage': 25, u'totalResults': 170}}
 
 
+def get_titles_from_playlist_items_response(response):
+    titles = []
+    videos = response.get("items")
+    for title in videos:
+        titles.append(title.get(u'snippet').get(u'title').encode("utf-8"))
+    return titles
+
+
 def get_upload_id_from_response(response):
     return response.get("items")[0].get(u'snippet').get(u'resourceId').get(u'videoId')
 
 
+def get_video_ids_from_playlist_items_response(response):
+    video_ids = []
+    videos = response.get("items")
+    for video_id in videos:
+        video_ids.append(video_id.get(u'snippet').get(u'resourceId').get(u'videoId').encode("utf-8"))
+    return video_ids
+
+
 print type(my_json)
-print get_upload_id_from_response(my_json)
+print get_titles_from_playlist_items_response(my_json)
+print get_video_ids_from_playlist_items_response(my_json)
