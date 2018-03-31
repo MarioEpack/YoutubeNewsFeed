@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
-
-import google.oauth2.credentials
-
-import google_auth_oauthlib.flow
+import os, sys
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -19,6 +14,10 @@ CLIENT_SECRETS_FILE = "client_secret.json"
 SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
+PART = 'contentDetails'
+VIDEO_URL = 'https://www.youtube.com/watch?v='
+MAX_RESULTS = 10
+CHANNEL_ID = 'UCQn1FqrR2OCjSe6Nl4GlVHw'
 
 
 def get_authenticated_service():
@@ -27,71 +26,31 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
-def print_response(response):
-    print(response)
-
-
-# Build a resource based on a list of properties given as key-value pairs.
-# Leave properties with empty values out of the inserted resource.
-def build_resource(properties):
-    resource = {}
-    for p in properties:
-        # Given a key like "snippet.title", split into "snippet" and "title", where
-        # "snippet" will be an object and "title" will be a property in that object.
-        prop_array = p.split('.')
-        ref = resource
-        for pa in range(0, len(prop_array)):
-            is_array = False
-            key = prop_array[pa]
-
-            # For properties that have array values, convert a name like
-            # "snippet.tags[]" to snippet.tags, and set a flag to handle
-            # the value as an array.
-            if key[-2:] == '[]':
-                key = key[0:len(key) - 2:]
-                is_array = True
-
-            if pa == (len(prop_array) - 1):
-                # Leave properties without values out of inserted resource.
-                if properties[p]:
-                    if is_array:
-                        ref[key] = properties[p].split(',')
-                    else:
-                        ref[key] = properties[p]
-            elif key not in ref:
-                # For example, the property is "snippet.title", but the resource does
-                # not yet have a "snippet" object. Create the snippet object here.
-                # Setting "ref = ref[key]" means that in the next time through the
-                # "for pa in range ..." loop, we will be setting a property in the
-                # resource's "snippet" object.
-                ref[key] = {}
-                ref = ref[key]
-            else:
-                # For example, the property is "snippet.description", and the resource
-                # already has a "snippet" object.
-                ref = ref[key]
-    return resource
-
-
-# Remove keyword arguments that are not set
-def remove_empty_kwargs(**kwargs):
-    good_kwargs = {}
-    if kwargs is not None:
-        for key, value in kwargs.iteritems():
-            if value:
-                good_kwargs[key] = value
-    return good_kwargs
-
-
-def channels_list_by_username(client, **kwargs):
-    # See full sample for function
-    kwargs = remove_empty_kwargs(**kwargs)
-
+# always just specify the channel_id to get the feed
+def channels_list_by_id(client, **kwargs):
     response = client.channels().list(
         **kwargs
     ).execute()
+    return response
 
-    return print_response(response)
+
+def get_upload_id_from_channel_response(response):
+    return response.get("items")[0].get("contentDetails").get("relatedPlaylists").get("uploads")
+
+
+def get_titles_from_playlist_items_response(response):
+    return response.get("items")[0].get(u'snippet').get(u'title')
+
+
+def get_video_ids_from_playlist_items_response(response):
+    return response.get("items")[0].get(u'snippet').get(u'resourceId').get(u'videoId')
+
+
+def playlist_items_list_by_playlist_id(client, **kwargs):
+    response = client.playlistItems().list(
+        **kwargs
+    ).execute()
+    return response
 
 
 if __name__ == '__main__':
@@ -99,7 +58,13 @@ if __name__ == '__main__':
     # running in production *do not* leave this option enabled.
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     client = get_authenticated_service()
+    # channel request
+    channel_response = channels_list_by_id(client, id=CHANNEL_ID, part=PART)  # Raon Lee Singer
+    uploads_id = get_upload_id_from_channel_response(channel_response)
+    # playlist_items request
+    playlist_items_response = playlist_items_list_by_playlist_id(client, part='snippet',maxResults=MAX_RESULTS, playlistId=uploads_id)
+    video_title = get_titles_from_playlist_items_response(playlist_items_response)
+    video_id = get_video_ids_from_playlist_items_response(playlist_items_response)
+    print video_title, VIDEO_URL + video_id
 
-    channels_list_by_username(client,
-                              part='contentDetails',
-                              forUsername='Raon Lee')
+
