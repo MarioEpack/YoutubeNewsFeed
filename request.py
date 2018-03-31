@@ -7,7 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
 # the OAuth 2.0 information for this application, including its client_id and
 # client_secret.
-CLIENT_SECRETS_FILE = "gitignore/client_secret.json"
+CLIENT_SECRETS_FILE = "client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
@@ -42,7 +42,7 @@ def get_titles_from_playlist_items_response(response):
     titles = []
     videos = response.get("items")
     for title in videos:
-        titles.append(title.get(u'snippet').get(u'title').encode("utf-8"))
+        titles.append(title.get(u'snippet').get(u'title').encode("utf-8", "ignore"))
     return titles
 
 
@@ -51,7 +51,7 @@ def get_video_ids_from_playlist_items_response(response):
     video_ids = []
     videos = response.get("items")
     for video_id in videos:
-        video_ids.append(yt_url + video_id.get(u'snippet').get(u'resourceId').get(u'videoId').encode("utf-8"))
+        video_ids.append(yt_url + video_id.get(u'snippet').get(u'resourceId').get(u'videoId').encode("utf-8", "ignore"))
     return video_ids
 
 
