@@ -17,7 +17,6 @@ API_VERSION = 'v3'
 
 PART = 'contentDetails'
 MAX_RESULTS = 10
-CHANNEL_ID = 'UCQn1FqrR2OCjSe6Nl4GlVHw'
 
 
 def get_authenticated_service():
@@ -72,15 +71,17 @@ if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     client = get_authenticated_service()
     # channel request
-    channel_response = channels_list_by_id(client, id=CHANNEL_ID, part=PART)  # Raon Lee Singer
+    print "Please input the channel id. (its the last id after channel slash https://www.youtube.com/channel/*******)"
+    channel_id = raw_input("> ")
+    channel_response = channels_list_by_id(client, id=channel_id, part=PART)  # Raon Lee Singer
     uploads_id = get_upload_id_from_channel_response(channel_response)
     # playlist_items request
     playlist_items_response = playlist_items_list_by_playlist_id(client, part='snippet',maxResults=MAX_RESULTS, playlistId=uploads_id)
     video_titles = get_titles_from_playlist_items_response(playlist_items_response)
     video_ids = get_video_ids_from_playlist_items_response(playlist_items_response)
 
+    print " Printing the latest videos: "
     for pair in pair_titles_to_video_ids(video_titles, video_ids):
         print pair
-
 
 
