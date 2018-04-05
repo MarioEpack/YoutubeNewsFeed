@@ -73,7 +73,7 @@ if __name__ == '__main__':
     # channel request
     print "Please input the channel id. (its the last id after channel slash https://www.youtube.com/channel/*******)"
     channel_id = raw_input("> ")
-    channel_response = channels_list_by_id(client, id=channel_id, part=PART)  # Raon Lee Singer
+    channel_response = channels_list_by_id(client, id=channel_id, part=PART)
     uploads_id = get_upload_id_from_channel_response(channel_response)
     # playlist_items request
     playlist_items_response = playlist_items_list_by_playlist_id(client, part='snippet',maxResults=MAX_RESULTS, playlistId=uploads_id)
