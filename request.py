@@ -25,7 +25,6 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
-# always just specify the channel_id to get the feed
 def channels_list_by_id(client, **kwargs):
     response = client.channels().list(
         **kwargs
